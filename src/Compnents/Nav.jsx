@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { NavOptions } from "../Data/data";
 import { RestaurantName } from "../Data/data";
 import { logo } from "../Data/data";
@@ -6,10 +6,27 @@ import gsap from "gsap";
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
-    gsap.from(".menu", { opacity: 0, duration: 2 });
-  }, []);
+    if (open && menuRef.current) {
+      gsap.fromTo(
+        menuRef.current,
+        { opacity: 0, y: -50 },
+        { opacity: 1, y: 0, duration: 0.9, ease: "elastic" }
+      );
+    }
+  }, [open]);
+
+  const closeMenu = () => {
+    gsap.to(menuRef.current, {
+      opacity: 0,
+      y: -20,
+      duration: 0.9,
+      ease: "elastic",
+      onComplete: () => setOpen(false),
+    });
+  };
 
   return (
     <nav className="flex justify-between sm:justify-around p-4 sticky top-0 bg-black text-white shadow-lg z-10">
@@ -31,7 +48,7 @@ export default function Nav() {
 
       <div className="sm:hidden">
         {open ? (
-          <button onClick={() => setOpen(false)}>
+          <button onClick={() => (open ? closeMenu() : setOpen(false))}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -67,7 +84,10 @@ export default function Nav() {
         )}
       </div>
       {open && (
-        <div className="absolute top-16 left-0 w-full bg-black text-white flex flex-col gap-4 p-17 border-t-2 border-b-2 border-[rgb(252,216,73)] rounded-2xl sm:hidden menu">
+        <div
+          className="absolute top-16 left-0 w-full bg-black text-white flex flex-col gap-4 p-17 border-t-2 border-b-2 border-[rgb(252,216,73)] rounded-2xl sm:hidden"
+          ref={menuRef}
+        >
           {NavOptions.map((navOp) => (
             <a
               href={`#${navOp.id}`}
