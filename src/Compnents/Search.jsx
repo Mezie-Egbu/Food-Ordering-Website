@@ -2,6 +2,7 @@ import { getOrder } from "../Data/data";
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import gsap from "gsap";
+import emailjs from "emailjs-com";
 
 export default function Search() {
   const [query, setQuery] = useState("");
@@ -10,6 +11,13 @@ export default function Search() {
   const [currentTitle, setCurrentTitle] = useState("");
   const [currentImage, setCurrentImage] = useState("");
   const [currentprice, setCurrentPrice] = useState("");
+
+  // Mail Info
+
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleClick = () => {
     const data = getOrder(query.toLowerCase());
@@ -36,6 +44,39 @@ export default function Search() {
   useEffect(() => {
     gsap.from(".orders", { opacity: 0, y: 50, duration: 1, stagger: 0.2 });
   }, [result]);
+
+  const sendEmail = (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const templateParams = {
+      customer_name: name,
+      customer_phone_no: phone,
+      customer_address: address,
+      order_item: currentTitle,
+      order_price: currentprice,
+      order_image: currentImage,
+    };
+
+    emailjs
+      .send(
+        "service_q93gxxw",
+        "template_111250x",
+        templateParams,
+        "ic-DeAlhEVmjEYVEx"
+      )
+      .then((reponse) => {
+        alert("Order Sent Successfully!");
+        closeModal();
+      })
+      .catch((error) => {
+        alert("Failed to send order. Please try again Later.");
+        console.log("EmailJS Error:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <div
@@ -129,18 +170,22 @@ export default function Search() {
               <p className="font-bold">{currentprice}</p>
             </div>
             <div>
-              <form action="">
+              <form onSubmit={sendEmail}>
                 <div>
                   <div className="sm:flex sm:justify-between p-1 flex gap-2 flex-col sm:flex-row sm:gap-0">
                     <input
                       type="text"
                       placeholder="Name"
                       className="outline-1 outline-gray-500 p-1 rounded-xl"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                     />
                     <input
                       type="number"
                       placeholder="Phone No"
                       className="outline-1 outline-gray-500 rounded-xl p-1"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
                   <div className="p-1">
@@ -148,15 +193,20 @@ export default function Search() {
                       type="text"
                       placeholder="Address"
                       className="outline-1 outline-gray-500 w-full p-1 rounded-xl"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="pt-3">
-                  <button className="bg-[rgb(252,216,73)] p-2 px-3 rounded-xl cursor-pointer border hover:bg-black hover:text-[rgb(252,216,73)] hover:border-t hover:border-b hover:border-[rgb(252,216,73)] mx-auto block">
-                    Order Now
-                  </button>
-                </div>
+                <button className="bg-[rgb(252,216,73)] p-2 px-3 rounded-xl cursor-pointer border mt-3 hover:bg-black hover:text-[rgb(252,216,73)] hover:border-t hover:border-b hover:border-[rgb(252,216,73)] mx-auto block">
+                  Order Now
+                </button>
+                {loading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="w-16 h-16 border-4 border-t-yellow-400 border-gray-300 rounded-full animate-spin"></div>
+                  </div>
+                )}
               </form>
             </div>
           </Modal>

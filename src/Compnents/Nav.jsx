@@ -12,19 +12,21 @@ export default function Nav() {
     if (open && menuRef.current) {
       gsap.fromTo(
         menuRef.current,
-        { opacity: 0, y: -50 },
-        { opacity: 1, y: 0, duration: 0.9, ease: "elastic" }
+        { opacity: 1, x: 650 },
+        { opacity: 1, x: 0, duration: 0.5, ease: "easeIn" }
       );
     }
   }, [open]);
 
   const closeMenu = () => {
     gsap.to(menuRef.current, {
-      opacity: 0,
-      y: -20,
-      duration: 0.9,
-      ease: "elastic",
-      onComplete: () => setOpen(false),
+      opacity: 1,
+      x: 650,
+      duration: 1,
+      ease: "easeOut",
+      onComplete: () => {
+        setOpen(false);
+      },
     });
   };
 
